@@ -29,11 +29,7 @@ terraform {
   backend "s3" {
     bucket = "gitops2003"
     key    = "terraform.tfstate"
-<<<<<<< HEAD
     region = "us-east-1"
-=======
-    region = "us-east-1"
->>>>>>> e8d4b8d (Initial commit - added Terraform configurations and GitHub Actions workflow)
   }
 
   required_version = "~> 1.6.3"
