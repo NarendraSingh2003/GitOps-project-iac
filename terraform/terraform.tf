@@ -1,5 +1,5 @@
 terraform {
-  required_version = "= 1.6.3"  # Exact version match
+  required_version = "= 1.6.3"  # MUST use exact version match
 
   backend "s3" {
     bucket         = "gitops2003"
@@ -12,21 +12,11 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "5.31.0"  # Pinned version for AWS provider
+      version = "5.31.0"  # Pinned version known to work with TF 1.6.3
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.23.0"  # Pinned version for Kubernetes provider
-    }
-  }
-}
-
-provider "aws" {
-  region = "us-east-1"
-  default_tags {
-    tags = {
-      Environment = "stage"
-      ManagedBy   = "terraform"
+      version = "2.23.0"
     }
   }
 }

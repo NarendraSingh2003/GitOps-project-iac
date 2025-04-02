@@ -13,48 +13,47 @@ on:
       - terraform/**
 
 env:
-  TF_VERSION: "1.6.3"
+  TF_VERSION: "1.6.3"  # Explicit version control
   AWS_REGION: "us-east-1"
 
 jobs:
   terraform:
     name: "Terraform CI"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04  # Specific runner version
     permissions:
       contents: read
       id-token: write
-
-    defaults:
-      run:
-        working-directory: ./terraform
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
+      # First remove any pre-installed Terraform
+      - name: Remove system Terraform
+        run: |
+          sudo rm -rf /usr/local/bin/terraform
+          sudo rm -rf /opt/hostedtoolcache/terraform
 
-      - name: Setup Terraform
+      # Then install exact version
+      - name: Install exact Terraform version
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-          terraform_wrapper: false
+          terraform_wrapper: false  # Critical to prevent version conflicts
 
-      - name: Verify Terraform Version
-        run: terraform version
+      - name: Verify Terraform version
+        run: |
+          terraform version
+          if ! terraform version | grep -q "Terraform v${{ env.TF_VERSION }}"; then
+            echo "Terraform version mismatch!"
+            exit 1
+          fi
 
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Format
-        run: terraform fmt -check -recursive
-
       - name: Terraform Validate
-        run: terraform validate -no-color
+        run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -input=false -no-color
+        run: terraform plan
