@@ -4,7 +4,7 @@ on:
     branches:
       - main
       - stage
-    paths:  
+    paths:
       - terraform/**
   pull_request:
     branches:
@@ -13,49 +13,48 @@ on:
       - terraform/**
 
 env:
-  # Credentials for deployment to AWS
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  # S3 bucket for the Terraform state
-  BUCKET_TF_STATE: ${{ secrets.BUCKET_TF_STATE }}
-  AWS_REGION: us-east-1
-  EKS_CLUSTER: vprofile-eks
+  TF_VERSION: "1.6.3"
+  AWS_REGION: "us-east-1"
 
 jobs:
   terraform:
-    name: "Apply terraform code changes"
-    runs-on: ubuntu-latest
+    name: "Terraform CI"
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+
     defaults:
       run:
-        shell: bash
         working-directory: ./terraform
 
     steps:
-      - name: Checkout source code 
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Terraform with specified version on the runner
-        uses: hashicorp/setup-terraform@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          terraform_version: 1.6.3
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Verify Terraform Version
+        run: terraform version
 
       - name: Terraform Init
-        id: init
-        run: terraform init -backend-config="bucket=$BUCKET_TF_STATE"
+        run: terraform init
 
       - name: Terraform Format
-        id: fmt
-        run: terraform fmt -check
+        run: terraform fmt -check -recursive
 
       - name: Terraform Validate
-        id: validate
-        run: terraform validate
+        run: terraform validate -no-color
 
       - name: Terraform Plan
-        id: plan
-        run: terraform plan -no-color -input=false -out planfile
-        continue-on-error: true
-
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
+        run: terraform plan -input=false -no-color

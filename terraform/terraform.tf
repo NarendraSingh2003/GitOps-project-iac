@@ -1,39 +1,32 @@
 terraform {
+  required_version = "= 1.6.3"  # Exact version match
+
+  backend "s3" {
+    bucket         = "gitops2003"
+    key            = "terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "terraform-lock"  # Recommended for state locking
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.25.0"
+      version = "5.31.0"  # Pinned version for AWS provider
     }
-
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.5.1"
-    }
-
-    tls = {
-      source  = "hashicorp/tls"
-      version = "~> 4.0.4"
-    }
-
-    cloudinit = {
-      source  = "hashicorp/cloudinit"
-      version = "~> 2.3.2"
-    }
-
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.23.0"
+      version = "2.23.0"  # Pinned version for Kubernetes provider
     }
   }
-
-  backend "s3" {
-    bucket = "gitops2003"
-    key    = "terraform.tfstate"
-    region = "us-east-1"
-  }
-
-  required_version = "~> 1.6.3"
 }
-##
-##
-##
+
+provider "aws" {
+  region = "us-east-1"
+  default_tags {
+    tags = {
+      Environment = "stage"
+      ManagedBy   = "terraform"
+    }
+  }
+}
