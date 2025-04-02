@@ -1,22 +1,39 @@
 terraform {
-  required_version = "= 1.6.3"  # MUST use exact version match
-
-  backend "s3" {
-    bucket         = "gitops2003"
-    key            = "terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-    dynamodb_table = "terraform-lock"  # Recommended for state locking
-  }
-
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "5.31.0"  # Pinned version known to work with TF 1.6.3
+      version = "~> 5.25.0"
     }
+
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5.1"
+    }
+
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0.4"
+    }
+
+    cloudinit = {
+      source  = "hashicorp/cloudinit"
+      version = "~> 2.3.2"
+    }
+
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.23.0"
+      version = "~> 2.23.0"
     }
   }
+
+  backend "s3" {
+    bucket = "gitops2003"
+    key    = "terraform.tfstate"
+    region = "us-east-1"
+  }
+
+  required_version = "~> 1.6.3"
 }
+##
+##
+##
