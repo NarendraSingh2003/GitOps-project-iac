@@ -1,15 +1,14 @@
-variable "vpc_id" {
-  description = "VPC ID where the cluster will be deployed"
+variable "region" {
+  description = "AWS region"
   type        = string
+  default     = "us-east-1"
 }
 
-variable "subnet_ids" {
-  description = "List of subnet IDs for the EKS cluster"
-  type        = list(string)
+variable "clusterName" {
+  description = "Name of the EKS cluster"
+  type        = string
+  default     = "vprofile-eks"
 }
 
-variable "cluster_name" {
-  description = "EKS Cluster name"
-  type        = string
-  default     = "my-eks-cluster"
-}
+
+##
