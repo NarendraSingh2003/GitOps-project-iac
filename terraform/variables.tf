@@ -4,7 +4,7 @@ variable "region" {
   default     = "us-east-2"
 }
 
-variable "clusterName" {
+variable "cluster_name" {
   description = "Name of the EKS cluster"
   type        = string
   default     = "vprofile-eks"
